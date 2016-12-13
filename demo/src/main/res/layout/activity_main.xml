@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="@dimen/activity_vertical_margin"
+    tools:context="net.mready.hover.demo.MainActivity">
+
+    <Button
+        android:id="@+id/btn_simple_window"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Open Simple Window" />
+
+    <Button
+        android:id="@+id/btn_resizable_window"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Open Resizeable Window" />
+
+    <Button
+        android:id="@+id/btn_focusable_window"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Open Focusable Window" />
+
+    <Button
+        android:id="@+id/btn_fullscreen_window"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Open Fullscreen Window" />
+
+    <Button
+        android:id="@+id/btn_overlay_window"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Open Overlay Window" />
+
+</LinearLayout>
