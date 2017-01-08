@@ -49,13 +49,4 @@ public final class Hover {
 
         activity.startActivityForResult(intent, requestCode);
     }
-
-    public static void hideActivity(Activity activity) {
-        if (!activity.moveTaskToBack(true)) {
-            Intent intent = new Intent();
-            intent.setAction(Intent.ACTION_MAIN);
-            intent.addCategory(Intent.CATEGORY_HOME);
-            activity.startActivity(intent);
-        }
-    }
 }
