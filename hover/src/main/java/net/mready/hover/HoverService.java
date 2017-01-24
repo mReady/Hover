@@ -117,7 +117,7 @@ public class HoverService extends Service {
     private HoverWindow createWindow(int id, Class<? extends HoverWindow> windowClass, Bundle arguments) {
         try {
             HoverWindow window = windowClass.newInstance();
-            window.id = id;
+            window.windowId = id;
             windows.put(id, window);
             window.performCreate(this, arguments);
 
@@ -202,7 +202,7 @@ public class HoverService extends Service {
         hideWindow(window);
         window.performDestroy();
 
-        windows.remove(window.id);
+        windows.remove(window.windowId);
     }
 
     private void removeAllWindows() {
@@ -225,8 +225,8 @@ public class HoverService extends Service {
     /*package*/ void setNotification(HoverWindow window, Notification notification) {
         if (notification == null) {
             //remove the current notification for this window
-            activeNotifications.remove(window.id);
-            if (foregroundNotificationWindowId == window.id) {
+            activeNotifications.remove(window.windowId);
+            if (foregroundNotificationWindowId == window.windowId) {
                 //if this window's notification was the service foreground notification, remove it
                 //and set another one as foreground if any is available
                 foregroundNotificationWindowId = 0;
@@ -240,18 +240,18 @@ public class HoverService extends Service {
                     stopForeground(true);
                 }
             } else {
-                notificationManager.cancel(NOTIFICATION_TAG, window.id);
+                notificationManager.cancel(NOTIFICATION_TAG, window.windowId);
             }
         } else {
-            activeNotifications.put(window.id, notification);
+            activeNotifications.put(window.windowId, notification);
             if (foregroundNotificationWindowId == 0) {
                 //if we have no foreground notification use this one
-                foregroundNotificationWindowId = window.id;
+                foregroundNotificationWindowId = window.windowId;
                 startForeground(FOREGROUND_NOTIFICATION_ID, notification);
             } else {
                 //we already have a foreground notification, set this one are ongoing
                 notification.flags |= Notification.FLAG_ONGOING_EVENT;
-                notificationManager.notify(NOTIFICATION_TAG, window.id, notification);
+                notificationManager.notify(NOTIFICATION_TAG, window.windowId, notification);
             }
         }
     }

@@ -21,6 +21,7 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.Scroller;
@@ -69,7 +70,7 @@ public class HoverWindow extends ContextThemeWrapper {
 
     /*package*/ boolean attached = false;
     /*package*/ boolean started = false;
-    /*package*/ int id;
+    /*package*/ int windowId;
 
     private int flags;
     private Bundle arguments;
@@ -139,8 +140,8 @@ public class HoverWindow extends ContextThemeWrapper {
     }
 
 
-    public int getId() {
-        return id;
+    public int getWindowId() {
+        return windowId;
     }
 
     protected void setArguments(Bundle arguments) {
@@ -157,30 +158,46 @@ public class HoverWindow extends ContextThemeWrapper {
 
 
     protected void setContentView(@LayoutRes int layoutId) {
-        setContentView(LayoutInflater.from(this).inflate(layoutId, windowView, false));
+        View view = LayoutInflater.from(this).inflate(layoutId, windowView, false);
+        setContentView(view, (FrameLayout.LayoutParams) view.getLayoutParams());
     }
 
-    protected void setContentView(View view) {
+    protected void setContentView(View view, FrameLayout.LayoutParams layoutParams) {
         contentView = view;
 
         windowView.removeAllViews();
         windowView.addView(view);
 
-        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) view.getLayoutParams();
-        windowLayoutParams.setFrom(lp);
-        lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
-        lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
+        windowLayoutParams.setFrom(layoutParams);
 
-        windowView.requestLayout();
+        ViewGroup.LayoutParams contentLayoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT);
+        contentView.setLayoutParams(contentLayoutParams);
+
+        if (windowLayoutParams.gravity != WindowLayoutParams.DEFAULT_GRAVITY) {
+            // let the window manager position our view with the requested gravity and then switch to the default gravity
+            windowView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    windowView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+
+                    int[] position = new int[2];
+                    windowView.getLocationOnScreen(position);
+                    windowLayoutParams.x = position[0];
+                    windowLayoutParams.y = position[1] - getStatusBarHeight();
+
+                    windowLayoutParams.gravity = WindowLayoutParams.DEFAULT_GRAVITY;
+                    updateWindowParams();
+                }
+            });
+        }
+
+        updateWindowParams();
     }
 
     public <T extends View> T findViewById(@IdRes int id) {
         //noinspection unchecked
         return (T) windowView.findViewById(id);
-    }
-
-    protected ViewGroup getWindowView() {
-        return windowView;
     }
 
     protected void setBackgroundColor(@ColorInt int color) {
@@ -192,14 +209,14 @@ public class HoverWindow extends ContextThemeWrapper {
         windowLayoutParams.height = height;
         windowView.scaleListener.aspectRatio = 0;
 
-        updateLayoutParams();
+        updateWindowParams();
     }
 
     protected void setWindowPosition(int x, int y) {
         windowLayoutParams.x = x;
         windowLayoutParams.y = y;
 
-        updateLayoutParams();
+        updateWindowParams();
     }
 
     public int getWindowWidth() {
@@ -239,7 +256,7 @@ public class HoverWindow extends ContextThemeWrapper {
             windowLayoutParams.flags |= WindowLayoutParams.FLAG_NOT_FOCUSABLE;
         }
 
-        updateLayoutParams();
+        updateWindowParams();
 
         onFocusChanged(true);
     }
@@ -251,7 +268,7 @@ public class HoverWindow extends ContextThemeWrapper {
         }
 
         windowLayoutParams.flags |= WindowLayoutParams.FLAG_NOT_FOCUSABLE;
-        updateLayoutParams();
+        updateWindowParams();
 
         onFocusChanged(false);
     }
@@ -315,13 +332,21 @@ public class HoverWindow extends ContextThemeWrapper {
         }
 
         windowLayoutParams.flags = windowFlags;
-        updateLayoutParams();
+        updateWindowParams();
     }
 
-    private void updateLayoutParams() {
+    private void updateWindowParams() {
         windowService.updateWindow(this);
     }
 
+    private int getStatusBarHeight() {
+        int result = 0;
+        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            result = getResources().getDimensionPixelSize(resourceId);
+        }
+        return result;
+    }
 
     protected boolean onWindowResizeBegin() {
         return true;
@@ -446,7 +471,7 @@ public class HoverWindow extends ContextThemeWrapper {
                     lastTouchX = event.getRawX();
                     lastTouchY = event.getRawY();
 
-                    updateLayoutParams();
+                    updateWindowParams();
                     break;
 
                 case MotionEvent.ACTION_UP:
@@ -493,7 +518,7 @@ public class HoverWindow extends ContextThemeWrapper {
             if (scroller.computeScrollOffset()) {
                 windowLayoutParams.x = scroller.getCurrX();
                 windowLayoutParams.y = scroller.getCurrY();
-                updateLayoutParams();
+                updateWindowParams();
                 postInvalidateOnAnimation();
             }
 
@@ -502,13 +527,15 @@ public class HoverWindow extends ContextThemeWrapper {
     }
 
     private static class WindowLayoutParams extends WindowManager.LayoutParams {
+        static final int DEFAULT_GRAVITY = Gravity.TOP | Gravity.LEFT;
+
         WindowLayoutParams() {
             super(WRAP_CONTENT, WRAP_CONTENT,
                     TYPE_PHONE,
                     FLAG_NOT_TOUCH_MODAL | FLAG_NOT_FOCUSABLE,
                     PixelFormat.TRANSLUCENT);
 
-            gravity = Gravity.TOP | Gravity.LEFT;
+            gravity = DEFAULT_GRAVITY;
             softInputMode = SOFT_INPUT_ADJUST_RESIZE;
         }
 
@@ -516,11 +543,21 @@ public class HoverWindow extends ContextThemeWrapper {
             width = lp.width;
             height = lp.height;
 
-            x = lp.leftMargin;
-            y = lp.topMargin;
+            int requestedGravity = lp.gravity;
+            if ((requestedGravity & Gravity.RIGHT) == Gravity.RIGHT) {
+                x = lp.rightMargin;
+            } else {
+                x = lp.leftMargin;
+            }
 
-            if (lp.gravity != -1) {
-                gravity = lp.gravity;
+            if ((requestedGravity & Gravity.BOTTOM) == Gravity.BOTTOM) {
+                y = lp.bottomMargin;
+            } else {
+                y = lp.topMargin;
+            }
+
+            if (requestedGravity != FrameLayout.LayoutParams.UNSPECIFIED_GRAVITY) {
+                gravity = requestedGravity;
             }
         }
     }
@@ -582,7 +619,7 @@ public class HoverWindow extends ContextThemeWrapper {
             windowLayoutParams.x = Math.max(0, windowLayoutParams.x - wDiffHalf);
             windowLayoutParams.y = Math.max(0, windowLayoutParams.y - hDiffHalf);
 
-            updateLayoutParams();
+            updateWindowParams();
 
             return true;
         }
