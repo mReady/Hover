@@ -153,15 +153,7 @@ public class HoverService extends Service {
         }
     }
 
-    private void checkWindow(HoverWindow window) {
-        if (!windows.containsValue(window)) {
-            throw new IllegalStateException("Service does not contain the window");
-        }
-    }
-
     private void showWindow(HoverWindow window) {
-        checkWindow(window);
-
         if (window.attached) {
             return;
         }
@@ -176,8 +168,6 @@ public class HoverService extends Service {
     }
 
     /*package*/ void updateWindow(HoverWindow window) {
-        checkWindow(window);
-
         if (!window.attached) {
             return;
         }
@@ -186,8 +176,6 @@ public class HoverService extends Service {
     }
 
     private void hideWindow(HoverWindow window) {
-        checkWindow(window);
-
         if (!window.attached) {
             return;
         }
@@ -198,8 +186,6 @@ public class HoverService extends Service {
     }
 
     /*package*/ void removeWindow(HoverWindow window) {
-        checkWindow(window);
-
         setNotification(window, null);
 
         hideWindow(window);
@@ -215,8 +201,6 @@ public class HoverService extends Service {
     }
 
     /*package*/ void bringToFront(HoverWindow window) {
-        checkWindow(window);
-
         if (!window.attached) {
             return;
         }
