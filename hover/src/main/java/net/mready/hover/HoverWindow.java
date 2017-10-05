@@ -26,7 +26,6 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.Scroller;
 
-
 public class HoverWindow extends ContextThemeWrapper {
 
     /**
@@ -531,7 +530,7 @@ public class HoverWindow extends ContextThemeWrapper {
 
         WindowLayoutParams() {
             super(WRAP_CONTENT, WRAP_CONTENT,
-                    TYPE_PHONE,
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? TYPE_APPLICATION_OVERLAY : TYPE_PHONE,
                     FLAG_NOT_TOUCH_MODAL | FLAG_NOT_FOCUSABLE,
                     PixelFormat.TRANSLUCENT);
 
@@ -624,4 +623,5 @@ public class HoverWindow extends ContextThemeWrapper {
             return true;
         }
     }
+
 }

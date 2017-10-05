@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HoverService extends Service {
+
     private static final String NOTIFICATION_TAG = "HoverWindow";
 
     //Determined by a fair dice roll, is there any way to make sure this is unique?
@@ -282,4 +283,5 @@ public class HoverService extends Service {
             }
         }
     }
+
 }

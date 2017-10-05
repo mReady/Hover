@@ -12,8 +12,8 @@ import net.mready.hover.demo.windows.OverlayWindow;
 import net.mready.hover.demo.windows.ResizeableWindow;
 import net.mready.hover.demo.windows.SimpleWindow;
 
-
 public class MainActivity extends AppCompatActivity {
+
     private static final int WINDOW_SIMPLE_ID = 1;
     private static final int WINDOW_RESIZEABLE_ID = 2;
     private static final int WINDOW_FOCUSABLE_ID = 3;
@@ -62,12 +62,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void openWindow(int id, Class<? extends HoverWindow> window) {
-        //APKs not installed via the Google Play Store require explicit permission to
-        //display overlay windows
+        // APKs not installed via the Google Play Store require explicit permission to
+        // display overlay windows
         if (!Hover.hasOverlayPermission(this)) {
             Hover.requestOverlayPermission(this, 0);
         } else {
             Hover.showWindow(this, id, window);
         }
     }
+
 }
