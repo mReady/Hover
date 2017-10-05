@@ -12,7 +12,8 @@ import android.support.v4.app.NotificationCompat;
 import net.mready.hover.HoverWindow;
 import net.mready.hover.demo.R;
 
-public class OverlayWindow extends HoverWindow {
+public class OverlayWindow extends BaseWindow {
+
     private static final String ACTION_CLOSE = "net.mready.hover.demo.CLOSE_OVERLAY_WINDOW";
 
     private CloseReceiver closeReceiver;
@@ -34,7 +35,7 @@ public class OverlayWindow extends HoverWindow {
         Intent closeIntent = new Intent(ACTION_CLOSE);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, closeIntent, 0);
 
-        setNotification(new NotificationCompat.Builder(this)
+        setNotification(new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
                 .setContentTitle("Hover Demo")
                 .setContentText("Overlay Window")
                 .setSmallIcon(R.mipmap.ic_launcher)
@@ -55,4 +56,5 @@ public class OverlayWindow extends HoverWindow {
             close();
         }
     }
+
 }

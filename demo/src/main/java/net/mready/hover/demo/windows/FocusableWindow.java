@@ -1,14 +1,14 @@
 package net.mready.hover.demo.windows;
 
-import android.app.Notification;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
 import android.view.View;
 
 import net.mready.hover.HoverWindow;
 import net.mready.hover.demo.R;
 
-public class FocusableWindow extends HoverWindow {
+public class FocusableWindow extends BaseWindow {
 
     @Override
     protected void onCreate(@Nullable Bundle arguments) {
@@ -28,10 +28,11 @@ public class FocusableWindow extends HoverWindow {
             }
         });
 
-        setNotification(new Notification.Builder(this)
+        setNotification(new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
                 .setContentTitle("Hover Demo")
                 .setContentText("Focusable Window")
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .build());
     }
+
 }

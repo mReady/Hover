@@ -1,8 +1,8 @@
 package net.mready.hover.demo.windows;
 
-import android.app.Notification;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
 import android.view.View;
 import android.widget.TextView;
 
@@ -11,7 +11,8 @@ import net.mready.hover.demo.R;
 
 import java.util.Locale;
 
-public class ResizeableWindow extends HoverWindow {
+public class ResizeableWindow extends BaseWindow {
+
     private TextView textView;
 
     @Override
@@ -32,7 +33,7 @@ public class ResizeableWindow extends HoverWindow {
         });
         textView = findViewById(R.id.tv_hello);
 
-        setNotification(new Notification.Builder(this)
+        setNotification(new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
                 .setContentTitle("Hover Demo")
                 .setContentText("Resizeable Window")
                 .setSmallIcon(R.mipmap.ic_launcher)
@@ -45,4 +46,5 @@ public class ResizeableWindow extends HoverWindow {
 
         textView.setText(String.format(Locale.US, "%d x %d", width, height));
     }
+
 }

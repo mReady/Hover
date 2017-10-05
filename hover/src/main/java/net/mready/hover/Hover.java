@@ -16,6 +16,7 @@ import static net.mready.hover.HoverService.EXTRA_WINDOW_CLASS;
 import static net.mready.hover.HoverService.EXTRA_WINDOW_ID;
 
 public final class Hover {
+
     private Hover() {
     }
 
@@ -37,7 +38,6 @@ public final class Hover {
                 .putExtra(EXTRA_WINDOW_ID, id));
     }
 
-
     public static boolean hasOverlayPermission(Context context) {
         return Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.canDrawOverlays(context);
     }
@@ -49,4 +49,5 @@ public final class Hover {
 
         activity.startActivityForResult(intent, requestCode);
     }
+
 }
