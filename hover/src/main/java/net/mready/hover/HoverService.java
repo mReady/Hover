@@ -86,21 +86,23 @@ public class HoverService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
 
-        switch (intent.getAction()) {
-            case ACTION_SHOW:
-                //noinspection unchecked
-                addWindow(intent.getIntExtra(EXTRA_WINDOW_ID, 0),
-                        (Class<? extends HoverWindow>) intent.getSerializableExtra(EXTRA_WINDOW_CLASS),
-                        intent.getBundleExtra(EXTRA_ARGUMENTS));
-                break;
+        if (intent != null && intent.getAction() != null) {
+            switch (intent.getAction()) {
+                case ACTION_SHOW:
+                    //noinspection unchecked
+                    addWindow(intent.getIntExtra(EXTRA_WINDOW_ID, 0),
+                            (Class<? extends HoverWindow>) intent.getSerializableExtra(EXTRA_WINDOW_CLASS),
+                            intent.getBundleExtra(EXTRA_ARGUMENTS));
+                    break;
 
-            case ACTION_CLOSE:
-                removeWindow(intent.getIntExtra(EXTRA_WINDOW_ID, 0));
-                break;
+                case ACTION_CLOSE:
+                    removeWindow(intent.getIntExtra(EXTRA_WINDOW_ID, 0));
+                    break;
 
-            case ACTION_CLOSE_ALL:
-                removeAllWindows();
-                break;
+                case ACTION_CLOSE_ALL:
+                    removeAllWindows();
+                    break;
+            }
         }
 
         return START_NOT_STICKY;
@@ -151,15 +153,7 @@ public class HoverService extends Service {
         }
     }
 
-    private void checkWindow(HoverWindow window) {
-        if (!windows.containsValue(window)) {
-            throw new IllegalStateException("Service does not contain the window");
-        }
-    }
-
     private void showWindow(HoverWindow window) {
-        checkWindow(window);
-
         if (window.attached) {
             return;
         }
@@ -174,8 +168,6 @@ public class HoverService extends Service {
     }
 
     /*package*/ void updateWindow(HoverWindow window) {
-        checkWindow(window);
-
         if (!window.attached) {
             return;
         }
@@ -184,8 +176,6 @@ public class HoverService extends Service {
     }
 
     private void hideWindow(HoverWindow window) {
-        checkWindow(window);
-
         if (!window.attached) {
             return;
         }
@@ -196,8 +186,6 @@ public class HoverService extends Service {
     }
 
     /*package*/ void removeWindow(HoverWindow window) {
-        checkWindow(window);
-
         setNotification(window, null);
 
         hideWindow(window);
@@ -213,8 +201,6 @@ public class HoverService extends Service {
     }
 
     /*package*/ void bringToFront(HoverWindow window) {
-        checkWindow(window);
-
         if (!window.attached) {
             return;
         }
@@ -260,26 +246,28 @@ public class HoverService extends Service {
     private class ScreenReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            switch (intent.getAction()) {
-                case Intent.ACTION_SCREEN_OFF:
-                    for (HoverWindow window : windows.values()) {
-                        if (window.attached) {
-                            window.performStop();
+            if (intent != null && intent.getAction() != null) {
+                switch (intent.getAction()) {
+                    case Intent.ACTION_SCREEN_OFF:
+                        for (HoverWindow window : windows.values()) {
+                            if (window.attached) {
+                                window.performStop();
+                            }
                         }
-                    }
-                    break;
-                case Intent.ACTION_SCREEN_ON:
-                    if (keyguardManager.inKeyguardRestrictedInputMode()) {
                         break;
-                    }
-                    //fallthrough
-                case Intent.ACTION_USER_PRESENT:
-                    for (HoverWindow window : windows.values()) {
-                        if (window.attached && !window.started) {
-                            window.performStart();
+                    case Intent.ACTION_SCREEN_ON:
+                        if (keyguardManager.inKeyguardRestrictedInputMode()) {
+                            break;
                         }
-                    }
-                    break;
+                        //fallthrough
+                    case Intent.ACTION_USER_PRESENT:
+                        for (HoverWindow window : windows.values()) {
+                            if (window.attached && !window.started) {
+                                window.performStart();
+                            }
+                        }
+                        break;
+                }
             }
         }
     }
